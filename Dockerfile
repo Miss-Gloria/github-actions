@@ -1,12 +1,16 @@
-# Step 1: Use the official Nginx image as the base image
-FROM nginx:alpine
+# Use the official Nginx image as the base image
+FROM nginx:latest
 
-# Step 2: Copy the HTML and image files into the Nginx web directory
-COPY index.html /usr/share/nginx/html/index.html
-COPY images /usr/share/nginx/html/images
+# Remove the default Nginx website files
+RUN rm -rf /usr/share/nginx/html/*
 
-# Step 3: Expose port 80
+# Copy your static website files to the Nginx web directory
+COPY . /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
 
-# Step 4: Start Nginx
+# Start Nginx in the foreground when the container launches
 CMD ["nginx", "-g", "daemon off;"]
+
+# -------------------------
