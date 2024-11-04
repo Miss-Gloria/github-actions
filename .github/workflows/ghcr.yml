@@ -36,3 +36,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}  
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Image to GHCR
+        run: docker push ghcr.io/miss_gloria/${{ env.IMAGE_NAME }}:latest
