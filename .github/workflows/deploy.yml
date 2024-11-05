@@ -1,0 +1,35 @@
+name: Deploy to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ECR_REGISTRY: <366551344481>.dkr.ecr.<your-region>.amazonaws.com
+  ECR_REPOSITORY: resume-app
+  IMAGE_TAG: latest
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
+
+      - name: Tag Docker image
+        run: docker tag ${{ env.ECR_REPOSITORY }}:$IMAGE_TAG ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+
+      - name: Push to Amazon ECR
+        run: docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
