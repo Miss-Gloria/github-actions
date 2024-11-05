@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  ECR_REGISTRY: 366551344481.dkr.ecr.us-east-1.amazonaws.com  # Replace with your actual account ID and region
+  ECR_REGISTRY: 366551344481.dkr.ecr.us-east-1.amazonaws.com  
   ECR_REPOSITORY: resume-app
   IMAGE_TAG: latest
 
