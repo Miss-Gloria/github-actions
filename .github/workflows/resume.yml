@@ -1,42 +1,28 @@
-name: Deploy Resume WebApp to EC2
+name: Deploy to S3 and Invalidate CloudFront
 
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
-    environment: prod
-    name: Deploy to EC2
+    name: Deploy
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout the files
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Server
-        uses: easingthemes/ssh-deploy@main
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS }}
-          REMOTE_USER: ${{ secrets.EC2_USER }}
-          TARGET: ${{ secrets.TARGET_DIR }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST_DNS }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            sudo apt-get -y update
-            sudo apt-get install -y apache2
-            sudo systemctl daemon-reload
-            sudo systemctl start apache2
-            sudo systemctl enable apache2
-            cd home
-            # Remove existing contents of /var/www/html
-            sudo rm -rf /var/www/html/*
-            # Move new files to /var/www/html
-            sudo mv * /var/www/html
+      - name: Sync files to S3
+        run: |
+          aws s3 sync . s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude ".*" --exclude "dockerfile" --exclude "*.txt"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
