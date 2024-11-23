@@ -1,4 +1,4 @@
-name: Deploy Resume WebApp to EC2
+name: Deploy Resume WebApp
 
 on:
   push:
