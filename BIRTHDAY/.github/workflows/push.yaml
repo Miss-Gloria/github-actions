@@ -2,8 +2,7 @@ name: Deploy Resume WebApp to EC2
 
 on:
   push:
-    branches:
-      - main
+
 
 jobs:
   deploy:
